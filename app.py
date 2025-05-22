@@ -5,17 +5,21 @@ import os
 app = Flask(__name__)
 DB_FILE = 'data_block/transactions.db'
 
-# 初始化数据库：建表结构（只在第一次访问前执行）
-@app.before_first_request
+# 初始化数据库逻辑
 def init_db():
     if not os.path.exists(DB_FILE):
+        print("📌 数据库不存在，开始初始化")
+        # 确保目录存在
+        os.makedirs(os.path.dirname(DB_FILE), exist_ok=True)
         conn = sqlite3.connect(DB_FILE)
         with open('schema.sql', 'r', encoding='utf-8') as f:
             conn.executescript(f.read())
         conn.close()
-        print("✅ 数据库已初始化")
     else:
         print("ℹ️ 数据库已存在，跳过初始化")
+
+# 应用启动时初始化数据库
+init_db()
 
 @app.route('/')
 def index():
@@ -32,4 +36,3 @@ def get_transactions():
 
 if __name__ == '__main__':
     app.run(debug=True)
-    
